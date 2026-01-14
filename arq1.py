@@ -1,4 +1,10 @@
 import requests
+import json
+try:
+    with open("siglas_paises.json","r",encoding="utf-8") as p:
+        paises_siglas = json.load(p)
+except FileNotFoundError:
+    paises_siglas = {}
 
 
 def buscar_clima(cidade):
@@ -6,40 +12,47 @@ def buscar_clima(cidade):
 
     # O parâmetro units=metric serve para vir em Celsius
     # O parâmetro lang=pt_br traduz a descrição do clima
-    link_xyz = (f"https://api.openweathermap.org/data/2.5/weather?q="
-            f"{cidade}&appid={api_key}&units=metric&lang=pt_br")
+    link_clima = f"https://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={api_key}&units=metric&lang=pt_br"
 
-    requisicao = requests.get(link_xyz)
+    link_geo = f"https://api.openweathermap.org/geo/1.0/direct?q={cidade}&limit=1&appid={api_key}"
 
-#verifica se a conexao foi bem sucedida
-    if requisicao.status_code == 200:
-        dados = requisicao.json()
+    res_geo = requests.get(link_geo)
+    res_clima = requests.get(link_clima)
+    if res_geo.status_code != 200 or not res_geo.json():
+        print("Erro ao localizar cidade via Geocoding.")
+        return
+
+    dados_geo = res_geo.json()
+    lat = dados_geo[0]["lat"]
+    long = dados_geo[0]["lon"]
+    pais = dados_geo[0]["country"]
+    estado = dados_geo[0].get("state", "N/A")
+
+    #verifica se a conexao foi bem sucedida
+    if res_clima.status_code == 200 and res_geo.status_code == 200:
+        dados_clima = res_clima.json()
 
         # Extraindo informações específicas do JSON
-        descricao = dados['weather'][0]['description']
-        temperatura = dados['main']['temp']
-        humidade = dados['main']['humidity']
-        cidade_nome = dados[2]['name']
+        descricao = dados_clima["weather"][0]["description"]
+        temperatura = dados_clima["main"]["temp"]
+        umidade = dados_clima["main"]["humidity"]
+        cidade_nome = dados_clima["name"]
         #previsao de 5 dias pra frente
         #poluição do ar
-        lat = dados['coord']['lat']
-        long = dados['coord']['lon']
-        pais = dados[0]['country']
 
 
         print(f"\n--- Clima em {cidade_nome} ---")
-
         print(f"Condição: {descricao.capitalize()}")
         print(f"Temperatura: {temperatura}°C")
-        print(f"Umidade: {humidade}%")
+        print(f"Umidade: {umidade}%")
         print(f"latitude {lat}")
-        print(f"latitude {long}")
-        print(f"País {pais}")
+        print(f"longitude {long}")
+        print(f"País: {paises_siglas.get(pais,pais)}\nEstado: {estado}")
+
     else:
         print("Erro ao encontrar cidade. Verifique o nome ou sua chave de API.")
 
 
-# Testando o código
 cidade_usuario = input("Digite o nome da cidade: ")
 buscar_clima(cidade_usuario)
 
