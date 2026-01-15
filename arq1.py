@@ -1,5 +1,9 @@
 import requests
 import json
+from datetime import datetime
+
+
+
 try:
     with open("siglas_paises.json","r",encoding="utf-8") as p:
         paises_siglas = json.load(p)
@@ -41,7 +45,7 @@ def buscar_clima(cidade):
         #poluição do ar
 
 
-        print(f"\n--- Clima em {cidade_nome} ---")
+        print(f"\n\n--- Clima em {cidade_nome} ---")
         print(f"Condição: {descricao.capitalize()}")
         print(f"Temperatura: {temperatura}°C")
         print(f"Umidade: {umidade}%")
@@ -58,6 +62,14 @@ def buscar_clima(cidade):
     if res_poluicao.status_code == 200:
         dados_pol = res_poluicao.json()
 
+        tradutor_aqi = {
+            1: "Boa",
+            2: "Razoável",
+            3: "Moderada",
+            4: "Pobre",
+            5: "Muito Pobre"
+        }
+
         #aqi = indicie de qualidade do ar
 
         aqi = dados_pol["list"][0]["main"]["aqi"]
@@ -66,14 +78,30 @@ def buscar_clima(cidade):
         no2 = componentes["no2"]
         o3 = componentes["o3"]
 
-        print(f"qualidade do ar (AQI): {aqi}")
-        print(f"concentração de CO: {co} µg/m³")
-        print(f"concentração de No2: {no2} µg/m³")
-        print(f"concentração de O3: {o3} µg/m³")
+        print(f"qualidade do ar (AQI): {tradutor_aqi[aqi]}, {aqi}")
+        print(f"\nconcentração de CO: {co} µg/m³")
+        print(f"\nconcentração de No2: {no2} µg/m³")
+        print(f"\nconcentração de O3: {o3} µg/m³")
 
 
+    link_previsao = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={long}&appid={api_key}&units=metric&lang=pt_br"
+    res_previsao = requests.get(link_previsao)
+
+    if res_previsao.status_code == 200:
+        dados_previsao = res_previsao.json()
+
+        lista_previsoes = dados_previsao["list"]
+
+        for prev in lista_previsoes[:3]:
+            data_hora = prev['dt_txt']
+            obj_data_form = datetime.strptime(data_hora, "%Y-%m-%d %H:%M:%S")
+            data_hora_formatada = obj_data_form.strftime("%d/%m/%Y %H:%M")
+            temp_prev = prev['main']['temp']
+            ceu = prev['weather'][0]['description']
+            print(f"\nData e hora prevista: {data_hora_formatada} | temperatura prevista: {temp_prev}°C | situação do céu prevista: {ceu}")
 
 
-cidade_usuario = input("Digite o nome da cidade: ")
-buscar_clima(cidade_usuario)
+while True:
+    cidade_usuario = input("Digite o nome da cidade: ")
+    buscar_clima(cidade_usuario)
 
