@@ -52,6 +52,27 @@ def buscar_clima(cidade):
     else:
         print("Erro ao encontrar cidade. Verifique o nome ou sua chave de API.")
 
+    link_poluicao = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={long}&appid={api_key}"
+    res_poluicao = requests.get(link_poluicao)
+
+    if res_poluicao.status_code == 200:
+        dados_pol = res_poluicao.json()
+
+        #aqi = indicie de qualidade do ar
+
+        aqi = dados_pol["list"][0]["main"]["aqi"]
+        componentes = dados_pol["list"][0]["components"]
+        co = componentes["co"]
+        no2 = componentes["no2"]
+        o3 = componentes["o3"]
+
+        print(f"qualidade do ar (AQI): {aqi}")
+        print(f"concentração de CO: {co} µg/m³")
+        print(f"concentração de No2: {no2} µg/m³")
+        print(f"concentração de O3: {o3} µg/m³")
+
+
+
 
 cidade_usuario = input("Digite o nome da cidade: ")
 buscar_clima(cidade_usuario)
