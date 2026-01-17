@@ -82,7 +82,7 @@ class OpenWeatherApp:
         dias = defaultdict(list)
 
         for item in previsoes:
-            data = self.formata_data(item["dt_txt"]).split(" ")[0]  
+            data = self.formata_data(item["dt_txt"])[:5]  # Extrai "DD/MM"
             dias[data].append({
                 "data_hora": item["dt_txt"],
                 "temperatura": item["main"]["temp"],
@@ -90,7 +90,8 @@ class OpenWeatherApp:
                 "umidade": item["main"]["humidity"],
                 "descricao": item["weather"][0]["description"],
                 "vento": item["wind"]["speed"],
-            })
+            }  
+            )
         return dict(dias)
 
 
