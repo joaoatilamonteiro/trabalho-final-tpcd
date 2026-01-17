@@ -3,7 +3,7 @@ from streamlit_app import render_app
 
 
 def main():
-    API_KEY = "5d795a0ef3a5d54327f99ce04dec18bd"
+    API_KEY = "389d09e6c175d65ddd691535ab080dc1"
     app = OpenWeatherApp(API_KEY)
     render_app(app)
 
