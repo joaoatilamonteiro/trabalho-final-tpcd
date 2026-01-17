@@ -1,3 +1,4 @@
+from collections import defaultdict
 import requests
 import json
 from datetime import datetime
@@ -75,5 +76,21 @@ class OpenWeatherApp:
         return obj_data_form.strftime("%d/%m/%Y %H:%M")
 
 
+    def previsao_por_dia(self, lat, lon):
+        dados = self.previsao(lat, lon)
+        previsoes = dados.get("list", [])
+        dias = defaultdict(list)
+
+        for item in previsoes:
+            data = self.formata_data(item["dt_txt"]).split(" ")[0]  
+            dias[data].append({
+                "data_hora": item["dt_txt"],
+                "temperatura": item["main"]["temp"],
+                "sensacao": item["main"]["feels_like"],
+                "umidade": item["main"]["humidity"],
+                "descricao": item["weather"][0]["description"],
+                "vento": item["wind"]["speed"],
+            })
+        return dict(dias)
 
 
