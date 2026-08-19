@@ -1,13 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-from datetime import datetime
-
-def formatar_data(data_str):
-    # Formata para Dia/Mês Hora:Minuto
-    return datetime.strptime(
-        data_str, "%Y-%m-%d %H:%M:%S"
-    ).strftime("%d/%m %H:%M")
 
 def render_app(openweather):
     st.set_page_config(page_title="Clima - OpenWeather", layout="centered")
@@ -29,10 +22,16 @@ def render_app(openweather):
         clima = dados["clima"]
         poluicao = dados["poluicao"]
         previsao = dados["previsao"]
-
-        pais = openweather.paises_siglas.get(
-            local["country"], local["country"]
-        )
+        sigla = local["country"]
+        try:
+            url_pais = f""
+            resposta_pais = requests.get(url_pais, timeout=5)
+            if resposta_pais.status_code == 200:
+                pais = resposta_pais.json()[0]["translations"]["por"]["common"]
+            else:
+                pais = sigla
+        except:
+            pais = sigla
 
         st.subheader(f"📍 {local['name']} - {pais}")
 
@@ -87,7 +86,7 @@ def render_app(openweather):
         # Removemos o [:8] para iterar sobre toda a lista (40 itens)
         registros = [
             {
-                "Data": formatar_data(item["dt_txt"]),
+                "Data_completa": item["dt_txt"],
                 "Temperatura (°C)": item["main"]["temp"],
                 "Umidade (%)": item["main"]["humidity"], # Adicionei umidade para ficar mais completo
                 "Descrição": item["weather"][0]["description"],
@@ -97,6 +96,8 @@ def render_app(openweather):
 
         df = pd.DataFrame(registros)
         
+        # Altere a linha do st.dataframe utilizando o drop() para esconder a coluna
+        st.dataframe(df.drop(columns=["Data_completa"]), use_container_width=True, hide_index=True, height=300)
         # Uso st.dataframe com altura fixa para criar barra de rolagem
         st.dataframe(df, use_container_width=True, hide_index=True, height=300)
 
@@ -104,7 +105,7 @@ def render_app(openweather):
         st.subheader("📊  Variação de Temperatura (5 Dias)")
 
         # Converter para datetime para o gráfico ordenar corretamente
-        df["Data_Plot"] = pd.to_datetime(df["Data"], format="%d/%m %H:%M")
+        df["Data_Plot"] = pd.to_datetime(df["Data_completa"])
         
         # O gráfico de linha lida bem com 40 pontos
         st.line_chart(df.set_index("Data_Plot")["Temperatura (°C)"])
