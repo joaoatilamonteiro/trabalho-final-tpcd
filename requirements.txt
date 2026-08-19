@@ -1,0 +1,14 @@
+streamlit
+pandas
+requests
+
+chore(requirements): add requirements.txt
+
+Add the initial dependencies file with the three libraries used in the
+project:
+- streamlit
+- pandas
+- requests
+
+This file will be used by `pip install -r requirements.txt` to set up the
+environment.
