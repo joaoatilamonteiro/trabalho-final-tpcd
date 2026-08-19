@@ -37,5 +37,26 @@ João Gabriel Aquino Ferreira - 582424
 
 6. Como Executar o Projeto
 
- Certifique-se de ter o Python instalado e todos os arquivos em uma mesma pasta. Em seguida, instale as bibliotecas necessárias executando o seguinte comando no terminal:  
-streamlit run main.py  
+```bash
+# 1. Abra o terminal NA PASTA DO PROJETO 
+#    No Windows: clique direito → “Abrir janela do PowerShell aqui”
+#    No Linux/macOS: use o gerenciador de arquivos → “Abrir terminal aqui”
+
+# 2. Atualize o pip (evita um monte de erro de versão)
+pip install --upgrade pip
+
+# 3. Crie o venv (usa python3 onde for necessário)
+python -m venv venv   # ou python3 -m venv venv no Linux/macOS
+
+# 4. Ative o venv
+#    Windows:
+.\venv\Scripts\activate
+#    Linux/macOS:
+source venv/bin/activate
+
+# 5. Instale as dependências 
+pip install -r requirements.txt
+
+# 6. Rode a aplicação
+streamlit run main.py
+```
